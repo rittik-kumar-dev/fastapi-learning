@@ -44,3 +44,9 @@ async def read_category_by_query(category:str):
 
 async def create_new_book(new_book=Body()):
     BOOKS.append(new_book)
+
+@app.put("/books/update_book")
+async def new_update_book(update_book=Body()):
+    for i in range(len(BOOKS)):
+        if BOOKS[i].get("title").casefold()==update_book.get("title").casefold():
+            BOOKS[i]=update_book
