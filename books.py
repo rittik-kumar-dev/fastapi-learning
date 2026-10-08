@@ -15,7 +15,7 @@ async def read_all_books():
     return BOOKS
 
 
-
+#Path parameter + query parameter
 @app.get("/books/{author}/")
 async def read_category_by_query_and_path(category:str,author:str):
     book_to_return =[]
@@ -57,3 +57,12 @@ async def delete_book(book_title:str):
         if BOOKS[i].get("title").casefold()==book_title.casefold():
             BOOKS.pop(i)
             break
+# below is question answer from course         
+@app.get("/books/byauthor/{author}")
+async def read_all_books_by_author(author:str):
+    return_book=[]
+    for book in BOOKS:
+        
+            if book.get("author").casefold()==author.casefold():
+                return_book.append(book)
+    return return_book
