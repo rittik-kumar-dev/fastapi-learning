@@ -66,3 +66,6 @@ async def read_all_books_by_author(author:str):
             if book.get("author").casefold()==author.casefold():
                 return_book.append(book)
     return return_book
+
+
+        
