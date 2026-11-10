@@ -6,9 +6,11 @@ from models import Todos
 from database import engine, SessionLocal
 from pydantic import BaseModel,Field
 from starlette import status
+from routers import auth
 
 
 app = FastAPI()
+app.include_router(auth.router)
 
 models.Base.metadata.create_all(bind=engine)
 class Todo_request(BaseModel):

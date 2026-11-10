@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,Path ,Query,HTTPException,status
 from pydantic import BaseModel,Field
 from typing import Optional
 app=FastAPI()
@@ -29,7 +29,7 @@ class Book_request(BaseModel):
             "title":" coding with rittik",
             "author":" zang lu",
             "description":"a new description of book",
-            "rating":"5"
+            "rating":5
             
         }
     }
@@ -47,29 +47,38 @@ BOOKS = [
     Book(5, 'HP2', 'Author 2', 'Book Description', 3),
     Book(6, 'HP3', 'Author 3', 'Book Description', 1)
 ]
-@app.get("/books")
+@app.get("/books",status_code=status.HTTP_200_OK)
 async def read_all_books():
     return BOOKS 
  
 @app.get("/books/{book_id}")
-async def get_book(book_id:int):
+async def get_book(book_id:int =Path(gt=0)):
     for book in BOOKS:
         if book.id==book_id:
             return book;
+    raise HTTPException(status_code=404, detail="Item not found")
 
 @app.get("/books/")
-async def read_by_rating(rating_value:int):
+async def read_by_rating(rating_value:int =Query(gt=0,lt=5)):
     for book in BOOKS:
         if book.rating==rating_value:
             return book
         
 @app.put("/books/update_book")
 async def update_book(book:Book_request):
+     book_changed=False
      for i in range(len(BOOKS)):
          if BOOKS[i].id==book.id:
-            BOOKS[i]=book       
+            BOOKS[i]=Book(book.id,
+                book.title,
+                book.author,
+                book.description,
+                book.rating)
+            book_changed=True
+     if not book_changed:
+                     raise HTTPException (status_code=404,detail="book not changed")
         
-@app.post("/create_book")
+@app.post("/create_book",status_code=status.HTTP_201_CREATED)
 async def create_book(bookrequest:Book_request):
     new_book=Book(**bookrequest.model_dump())
     
@@ -88,11 +97,14 @@ def find_book_id(book:Book):
 
 @app.delete("/books/delete_book/{book_title}")
 async def delete_book(book_title:str):
+    book_deleted=False
     for i in range(len(BOOKS)):
         if BOOKS[i].title.casefold()==book_title.casefold():
             BOOKS.pop(i)
+            book_deleted=True
             return {"message": "Book deleted successfully"}
-        return {"message": "Book not found"}
+        
 
-
+    if not book_deleted:
+            raise HTTPException (status_code=404,detail= "Book not found")
         
